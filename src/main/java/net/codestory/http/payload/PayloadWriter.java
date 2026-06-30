@@ -78,6 +78,7 @@ public class PayloadWriter {
   protected final Site site;
   protected final Resources resources;
   protected final CompilerFacade compilers;
+  private String responseContentType;
 
   public PayloadWriter(Request request, Response response, Env env, Site site, Resources resources, CompilerFacade compilers) {
     this.request = request;
@@ -179,6 +180,7 @@ public class PayloadWriter {
     String uri = request.uri();
 
     String contentTypeHeader = (contentType != null) ? contentType : getContentType(content, uri);
+    responseContentType = contentTypeHeader;
     response.setHeader(CONTENT_TYPE, contentTypeHeader);
     response.setStatus(code);
 
@@ -311,7 +313,7 @@ public class PayloadWriter {
   }
 
   protected boolean shouldGzip() {
-    return env.gzip() && env.prodMode() && request.header(ACCEPT_ENCODING, "").contains(GZIP);
+    return env.gzip() && env.prodMode() && request.header(ACCEPT_ENCODING, "").contains(GZIP) && env.isGzipableContentType(responseContentType);
   }
 
   protected boolean shouldIgnoreError(IOException e) {
